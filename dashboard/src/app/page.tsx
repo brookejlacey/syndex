@@ -8,6 +8,9 @@ import { ActivityFeed } from '@/components/ActivityFeed';
 import { LoanTable } from '@/components/LoanTable';
 import { TipFeed } from '@/components/TipFeed';
 import { PositionsChart } from '@/components/PositionsChart';
+import { NegotiationPanel } from '@/components/NegotiationPanel';
+import { CommandTerminal } from '@/components/CommandTerminal';
+import { EconomicsPanel } from '@/components/EconomicsPanel';
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
 
@@ -28,6 +31,17 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {state?.economics && (
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+              state.economics.selfSustaining
+                ? 'border-green-500/30 bg-green-500/10'
+                : 'border-yellow-500/30 bg-yellow-500/10'
+            }`}>
+              <span className="text-xs font-medium">
+                {state.economics.selfSustaining ? 'SELF-SUSTAINING' : 'BUILDING'}
+              </span>
+            </div>
+          )}
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${connected ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'}`}>
             <div className={`w-2 h-2 rounded-full animate-pulse-dot ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
             <span className="text-xs font-medium">{connected ? 'LIVE' : 'CONNECTING'}</span>
@@ -60,6 +74,9 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* Economics overview */}
+          <EconomicsPanel economics={state.economics} />
+
           {/* Top metrics */}
           <MetricsBar state={state} />
 
@@ -70,16 +87,20 @@ export default function Dashboard() {
             ))}
           </div>
 
+          {/* Command terminal */}
+          <CommandTerminal />
+
           {/* Main content grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left column — Flow + Positions + Loans */}
+            {/* Left column */}
             <div className="lg:col-span-2 space-y-6">
               <FlowDiagram state={state} />
               <PositionsChart state={state} />
+              <NegotiationPanel negotiations={state.negotiations || []} />
               <LoanTable loans={state.loans} />
             </div>
 
-            {/* Right column — Activity + Tips */}
+            {/* Right column */}
             <div className="space-y-6">
               <ActivityFeed decisions={decisions} />
               <TipFeed tips={state.tips} />

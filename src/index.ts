@@ -6,6 +6,8 @@ import { BankerAgent } from './agents/banker/index.js';
 import { StrategistAgent } from './agents/strategist/index.js';
 import { PatronAgent } from './agents/patron/index.js';
 import { NexusOrchestrator } from './agents/nexus/index.js';
+import { NegotiationEngine } from './core/negotiation-engine.js';
+import { CommandEngine } from './core/command-engine.js';
 import { ApiServer } from './services/api-server.js';
 import { logger } from './utils/logger.js';
 
@@ -82,9 +84,22 @@ async function main() {
   // Register agents with orchestrator
   nexus.registerAgents(banker, strategist, patron);
 
+  // ─── Legendary Engines ────────────────────────────────────
+  const negotiation = new NegotiationEngine(bus, brain);
+  const command = new CommandEngine(brain, bus, wallet);
+  command.registerAgents(nexus, banker, strategist, patron);
+
+  // Inject engines into agents
+  banker.setNegotiationEngine(negotiation);
+  strategist.setNegotiationEngine(negotiation);
+  nexus.setEngines(negotiation, command);
+
+  logger.info('[BOOT] Negotiation engine + Natural language command engine initialized');
+
   // ─── Start API Server ───────────────────────────────────────
   const apiPort = parseInt(process.env.WS_PORT || '3001');
   const api = new ApiServer(bus, nexus, banker, strategist, patron);
+  api.setEngines(command, negotiation);
   api.start(apiPort);
 
   // ─── Start All Agents ───────────────────────────────────────

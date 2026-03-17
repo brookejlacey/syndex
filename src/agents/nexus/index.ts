@@ -2,7 +2,9 @@ import { BaseAgent } from '../../core/base-agent.js';
 import type { MessageBus } from '../../core/message-bus.js';
 import type { WalletManager } from '../../core/wallet-manager.js';
 import type { Brain } from '../../core/brain.js';
-import type { AgentMessage, AgentRole, NetworkState } from '../../types/index.js';
+import type { AgentMessage, AgentRole, NetworkState, NetworkEconomics } from '../../types/index.js';
+import type { NegotiationEngine } from '../../core/negotiation-engine.js';
+import type { CommandEngine } from '../../core/command-engine.js';
 import type { BankerAgent } from '../banker/index.js';
 import type { StrategistAgent } from '../strategist/index.js';
 import type { PatronAgent } from '../patron/index.js';
@@ -25,6 +27,10 @@ export class NexusOrchestrator extends BaseAgent {
   private patronAgent?: PatronAgent;
   private networkState: NetworkState;
   private healthCheckInterval = 0;
+  private negotiationEngine?: NegotiationEngine;
+  private commandEngine?: CommandEngine;
+  private apiCallCount = 0;
+  private estimatedApiCost = 0; // rough: $0.003 per Sonnet call
 
   constructor(bus: MessageBus, wallet: WalletManager, brain: Brain) {
     super('nexus', bus, wallet, brain);
@@ -42,12 +48,20 @@ export class NexusOrchestrator extends BaseAgent {
       loans: [],
       positions: [],
       tips: [],
+      negotiations: [],
+      commandLog: [],
+      economics: { apiCostUsd: 0, yieldEarnedUsd: 0, tipsPaidUsd: 0, selfSustaining: false, sustainabilityRatio: 0 },
       totalValueLocked: 0,
       totalYieldEarned: 0,
       totalTipsPaid: 0,
       networkHealth: 'healthy',
       lastUpdated: Date.now(),
     };
+  }
+
+  setEngines(negotiation: NegotiationEngine, command: CommandEngine): void {
+    this.negotiationEngine = negotiation;
+    this.commandEngine = command;
   }
 
   /** Register child agents for direct monitoring */
@@ -217,9 +231,33 @@ ORCHESTRATION RULES:
       this.networkState.totalTipsPaid = this.patronAgent.getMetrics().totalTipped;
     }
 
+    // Negotiations
+    if (this.negotiationEngine) {
+      this.networkState.negotiations = this.negotiationEngine.getNegotiations();
+    }
+
+    // Command log
+    if (this.commandEngine) {
+      this.networkState.commandLog = this.commandEngine.getCommandLog();
+    }
+
     // Calculate TVL
     this.networkState.totalValueLocked = Object.values(this.networkState.agents)
       .reduce((sum, a) => sum + a.balance, 0);
+
+    // Track API costs (rough estimate: $0.003 per Sonnet call)
+    const decisionCount = this.brain.getDecisionLog().length;
+    this.estimatedApiCost = decisionCount * 0.003;
+
+    // Economics: is the network self-sustaining?
+    const economics: NetworkEconomics = {
+      apiCostUsd: this.estimatedApiCost,
+      yieldEarnedUsd: this.networkState.totalYieldEarned,
+      tipsPaidUsd: this.networkState.totalTipsPaid,
+      selfSustaining: this.networkState.totalYieldEarned > this.estimatedApiCost,
+      sustainabilityRatio: this.estimatedApiCost > 0 ? this.networkState.totalYieldEarned / this.estimatedApiCost : 0,
+    };
+    this.networkState.economics = economics;
 
     // Determine network health
     const statuses = Object.values(this.networkState.agents).map(a => a.status);

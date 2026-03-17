@@ -98,6 +98,47 @@ export const MessageSchema = z.discriminatedUnion('type', [
     action: z.enum(['pause', 'resume', 'liquidate']),
     timestamp: z.number(),
   }),
+  // ─── Negotiation Messages ──────────────────────────────────
+  z.object({
+    type: z.literal('negotiate_proposal'),
+    from: z.string(),
+    to: z.string(),
+    negotiationId: z.string(),
+    round: z.number(),
+    terms: z.object({
+      amount: z.number(),
+      interestRate: z.number(),
+      duration: z.number(),
+      collateralRatio: z.number().optional(),
+    }),
+    reasoning: z.string(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal('negotiate_counter'),
+    from: z.string(),
+    to: z.string(),
+    negotiationId: z.string(),
+    round: z.number(),
+    terms: z.object({
+      amount: z.number(),
+      interestRate: z.number(),
+      duration: z.number(),
+      collateralRatio: z.number().optional(),
+    }),
+    reasoning: z.string(),
+    accepted: z.boolean(),
+    timestamp: z.number(),
+  }),
+  // ─── Natural Language Command ──────────────────────────────
+  z.object({
+    type: z.literal('human_command'),
+    from: z.string(),
+    to: z.string(),
+    command: z.string(),
+    response: z.string().optional(),
+    timestamp: z.number(),
+  }),
 ]);
 
 export type AgentMessage = z.infer<typeof MessageSchema>;
@@ -155,12 +196,63 @@ export interface TipRecord {
   txHash?: string;
 }
 
+// ─── Negotiation ────────────────────────────────────────────────
+export interface Negotiation {
+  id: string;
+  borrower: AgentRole;
+  lender: AgentRole;
+  rounds: NegotiationRound[];
+  status: 'active' | 'agreed' | 'rejected' | 'expired';
+  finalTerms?: {
+    amount: number;
+    interestRate: number;
+    duration: number;
+  };
+  startedAt: number;
+  resolvedAt?: number;
+}
+
+export interface NegotiationRound {
+  round: number;
+  proposer: AgentRole;
+  terms: {
+    amount: number;
+    interestRate: number;
+    duration: number;
+    collateralRatio?: number;
+  };
+  reasoning: string;
+  accepted: boolean;
+  timestamp: number;
+}
+
+// ─── Network Economics ──────────────────────────────────────────
+export interface NetworkEconomics {
+  apiCostUsd: number;         // Total Claude API spend
+  yieldEarnedUsd: number;     // Total yield from DeFi
+  tipsPaidUsd: number;        // Total tips to creators
+  selfSustaining: boolean;    // yield > api cost?
+  sustainabilityRatio: number; // yield / api cost
+}
+
+// ─── Human Command Log ──────────────────────────────────────────
+export interface CommandLog {
+  id: string;
+  command: string;
+  response: string;
+  executedAction?: string;
+  timestamp: number;
+}
+
 // ─── Network State (for dashboard) ──────────────────────────────
 export interface NetworkState {
   agents: Record<AgentRole, AgentStatus>;
   loans: Loan[];
   positions: DeFiPosition[];
   tips: TipRecord[];
+  negotiations: Negotiation[];
+  commandLog: CommandLog[];
+  economics: NetworkEconomics;
   totalValueLocked: number;
   totalYieldEarned: number;
   totalTipsPaid: number;

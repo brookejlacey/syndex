@@ -6,6 +6,8 @@ import type { NexusOrchestrator } from '../agents/nexus/index.js';
 import type { BankerAgent } from '../agents/banker/index.js';
 import type { StrategistAgent } from '../agents/strategist/index.js';
 import type { PatronAgent } from '../agents/patron/index.js';
+import type { CommandEngine } from '../core/command-engine.js';
+import type { NegotiationEngine } from '../core/negotiation-engine.js';
 import type { DashboardEvent } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 
@@ -22,6 +24,8 @@ export class ApiServer {
   private banker: BankerAgent;
   private strategist: StrategistAgent;
   private patron: PatronAgent;
+  private commandEngine?: CommandEngine;
+  private negotiationEngine?: NegotiationEngine;
 
   constructor(
     bus: MessageBus,
@@ -106,6 +110,40 @@ export class ApiServer {
       res.json(this.bus.getHistory(undefined, limit));
     });
 
+    // Natural language command endpoint
+    this.app.post('/api/command', async (req, res) => {
+      if (!this.commandEngine) {
+        res.status(503).json({ error: 'Command engine not initialized' });
+        return;
+      }
+      const { command } = req.body;
+      if (!command || typeof command !== 'string') {
+        res.status(400).json({ error: 'Missing "command" in request body' });
+        return;
+      }
+      try {
+        const result = await this.commandEngine.execute(command);
+        res.json(result);
+      } catch (err) {
+        res.status(500).json({ error: (err as Error).message });
+      }
+    });
+
+    // Negotiations
+    this.app.get('/api/negotiations', (_req, res) => {
+      if (!this.negotiationEngine) {
+        res.json([]);
+        return;
+      }
+      res.json(this.negotiationEngine.getNegotiations());
+    });
+
+    // Economics
+    this.app.get('/api/economics', (_req, res) => {
+      const state = this.nexus.getNetworkState();
+      res.json(state.economics);
+    });
+
     // Health check
     this.app.get('/api/health', (_req, res) => {
       const state = this.nexus.getNetworkState();
@@ -152,6 +190,11 @@ export class ApiServer {
       logger.info(`[API] Server running on http://localhost:${port}`);
       logger.info(`[API] WebSocket on ws://localhost:${port}`);
     });
+  }
+
+  setEngines(command: CommandEngine, negotiation: NegotiationEngine): void {
+    this.commandEngine = command;
+    this.negotiationEngine = negotiation;
   }
 
   stop(): void {

@@ -2,11 +2,47 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 
+interface NetworkEconomics {
+  apiCostUsd: number;
+  yieldEarnedUsd: number;
+  tipsPaidUsd: number;
+  selfSustaining: boolean;
+  sustainabilityRatio: number;
+}
+
+interface Negotiation {
+  id: string;
+  borrower: string;
+  lender: string;
+  rounds: {
+    round: number;
+    proposer: string;
+    terms: { amount: number; interestRate: number; duration: number };
+    reasoning: string;
+    accepted: boolean;
+    timestamp: number;
+  }[];
+  status: string;
+  finalTerms?: { amount: number; interestRate: number; duration: number };
+  startedAt: number;
+}
+
+interface CommandLog {
+  id: string;
+  command: string;
+  response: string;
+  executedAction?: string;
+  timestamp: number;
+}
+
 interface NetworkState {
   agents: Record<string, AgentStatus>;
   loans: Loan[];
   positions: DeFiPosition[];
   tips: TipRecord[];
+  negotiations: Negotiation[];
+  commandLog: CommandLog[];
+  economics: NetworkEconomics;
   totalValueLocked: number;
   totalYieldEarned: number;
   totalTipsPaid: number;

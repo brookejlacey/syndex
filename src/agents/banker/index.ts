@@ -2,6 +2,7 @@ import { BaseAgent } from '../../core/base-agent.js';
 import type { MessageBus } from '../../core/message-bus.js';
 import type { WalletManager } from '../../core/wallet-manager.js';
 import type { Brain } from '../../core/brain.js';
+import type { NegotiationEngine } from '../../core/negotiation-engine.js';
 import type { AgentMessage, Loan, CreditProfile } from '../../types/index.js';
 import { logger } from '../../utils/logger.js';
 import { randomUUID } from 'crypto';
@@ -22,9 +23,14 @@ export class BankerAgent extends BaseAgent {
   private lentOut = 0;
   private aaveDeposited = 0;
   private totalInterestEarned = 0;
+  private negotiationEngine?: NegotiationEngine;
 
   constructor(bus: MessageBus, wallet: WalletManager, brain: Brain) {
     super('banker', bus, wallet, brain);
+  }
+
+  setNegotiationEngine(engine: NegotiationEngine): void {
+    this.negotiationEngine = engine;
   }
 
   protected getSystemPrompt(): string {
@@ -132,6 +138,12 @@ Should I deposit idle capital into Aave for base yield, or hold liquidity for po
       case 'loan_request':
         this.handleLoanRequest(message);
         break;
+      case 'negotiate_proposal':
+        this.handleNegotiationProposal(message);
+        break;
+      case 'negotiate_counter':
+        this.handleNegotiationCounter(message);
+        break;
       case 'repayment':
         this.handleRepayment(message);
         break;
@@ -142,6 +154,119 @@ Should I deposit idle capital into Aave for base yield, or hold liquidity for po
         if (message.action === 'pause') this.pause();
         if (message.action === 'resume') this.resume();
         break;
+    }
+  }
+
+  private async handleNegotiationProposal(msg: Extract<AgentMessage, { type: 'negotiate_proposal' }>): Promise<void> {
+    if (!this.negotiationEngine) return;
+
+    const credit = this.getCreditProfile(msg.from);
+    const utilization = this.lentOut / (this.poolSize + this.lentOut || 1);
+
+    const evaluation = await this.negotiationEngine.evaluateAsLender(msg.negotiationId, {
+      poolSize: this.poolSize,
+      utilization,
+      creditScore: credit.score,
+    });
+
+    const result = await this.negotiationEngine.processCounter(
+      msg.negotiationId,
+      'banker',
+      evaluation.counterTerms,
+      evaluation.accept,
+    );
+
+    if (result.resolved && result.accepted && result.finalTerms) {
+      // Agreement reached — issue the loan
+      await this.issueLoanFromNegotiation(msg.from, result.finalTerms);
+    }
+
+    this.updateAction(result.resolved
+      ? (result.accepted ? `negotiation agreed — issuing loan` : `negotiation rejected`)
+      : `negotiation: countered at ${(evaluation.counterTerms.interestRate * 100).toFixed(1)}%`
+    );
+  }
+
+  private async handleNegotiationCounter(msg: Extract<AgentMessage, { type: 'negotiate_counter' }>): Promise<void> {
+    if (!this.negotiationEngine) return;
+
+    if (msg.accepted) {
+      // Borrower accepted our counter — issue loan
+      const neg = this.negotiationEngine.getNegotiation(msg.negotiationId);
+      if (neg?.finalTerms) {
+        await this.issueLoanFromNegotiation(msg.from, neg.finalTerms);
+      }
+      return;
+    }
+
+    // Evaluate the borrower's counter
+    const credit = this.getCreditProfile(msg.from);
+    const utilization = this.lentOut / (this.poolSize + this.lentOut || 1);
+
+    const evaluation = await this.negotiationEngine.evaluateAsLender(msg.negotiationId, {
+      poolSize: this.poolSize,
+      utilization,
+      creditScore: credit.score,
+    });
+
+    const result = await this.negotiationEngine.processCounter(
+      msg.negotiationId,
+      'banker',
+      evaluation.counterTerms,
+      evaluation.accept,
+    );
+
+    if (result.resolved && result.accepted && result.finalTerms) {
+      await this.issueLoanFromNegotiation(msg.from, result.finalTerms);
+    }
+  }
+
+  private async issueLoanFromNegotiation(
+    borrower: string,
+    terms: { amount: number; interestRate: number; duration: number },
+  ): Promise<void> {
+    const loanId = `LOAN-${randomUUID().slice(0, 8)}`;
+
+    try {
+      const result = await this.wallet.sendToAgent('banker', borrower as any, terms.amount);
+
+      const loan: Loan = {
+        id: loanId,
+        borrower: borrower as any,
+        lender: 'banker',
+        principal: terms.amount,
+        interestRate: terms.interestRate,
+        issuedAt: Date.now(),
+        dueAt: Date.now() + (terms.duration * 60 * 60 * 1000),
+        repaidAmount: 0,
+        status: 'active',
+        purpose: 'Negotiated loan',
+        txHash: result.hash,
+      };
+
+      this.loans.push(loan);
+      this.lentOut += terms.amount;
+
+      const credit = this.getCreditProfile(borrower);
+      credit.totalBorrowed += terms.amount;
+
+      // Notify borrower
+      this.sendMessage({
+        type: 'loan_response',
+        from: 'banker',
+        to: borrower,
+        approved: true,
+        amount: terms.amount,
+        interestRate: terms.interestRate,
+        loanId,
+        reason: `Negotiated agreement — ${terms.amount} USDt at ${(terms.interestRate * 100).toFixed(1)}% for ${terms.duration}h`,
+        timestamp: Date.now(),
+      });
+
+      logger.info(`[BANKER] Negotiated loan ${loanId}: ${terms.amount} USDt to ${borrower} at ${(terms.interestRate * 100).toFixed(1)}%`);
+      this.updateAction(`issued negotiated loan ${loanId}`);
+    } catch (err) {
+      logger.error(`[BANKER] Negotiated loan transfer failed:`, err);
     }
   }
 

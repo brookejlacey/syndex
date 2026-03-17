@@ -2,6 +2,7 @@ import { BaseAgent } from '../../core/base-agent.js';
 import type { MessageBus } from '../../core/message-bus.js';
 import type { WalletManager } from '../../core/wallet-manager.js';
 import type { Brain } from '../../core/brain.js';
+import type { NegotiationEngine } from '../../core/negotiation-engine.js';
 import type { AgentMessage, DeFiPosition } from '../../types/index.js';
 import { logger } from '../../utils/logger.js';
 import { randomUUID } from 'crypto';
@@ -22,9 +23,16 @@ export class StrategistAgent extends BaseAgent {
   private totalDeployed = 0;
   private activeLoanId: string | null = null;
   private loanDebt = 0;
+  private negotiationEngine?: NegotiationEngine;
+  private activeNegotiationId: string | null = null;
 
   constructor(bus: MessageBus, wallet: WalletManager, brain: Brain) {
     super('strategist', bus, wallet, brain);
+  }
+
+  /** Inject negotiation engine (set from index.ts after construction) */
+  setNegotiationEngine(engine: NegotiationEngine): void {
+    this.negotiationEngine = engine;
   }
 
   protected getSystemPrompt(): string {
@@ -144,6 +152,9 @@ What should I do? Consider deploying idle capital, rebalancing positions, borrow
       case 'fund_transfer':
         this.handleFundTransfer(message);
         break;
+      case 'negotiate_counter':
+        this.handleNegotiationCounter(message);
+        break;
       case 'health_check':
         this.respondHealthCheck(message);
         break;
@@ -152,6 +163,43 @@ What should I do? Consider deploying idle capital, rebalancing positions, borrow
         if (message.action === 'resume') this.resume();
         if (message.action === 'liquidate') this.liquidateAll();
         break;
+    }
+  }
+
+  private async handleNegotiationCounter(msg: Extract<AgentMessage, { type: 'negotiate_counter' }>): Promise<void> {
+    if (!this.negotiationEngine || msg.negotiationId !== this.activeNegotiationId) return;
+
+    if (msg.accepted) {
+      // Banker accepted our terms — deal is done, loan will be issued via loan_response
+      logger.info(`[STRATEGIST] Negotiation ${msg.negotiationId} — Banker accepted!`);
+      this.activeNegotiationId = null;
+      return;
+    }
+
+    // Evaluate the counter-offer
+    const balance = await this.wallet.getBalance('strategist');
+    const evaluation = await this.negotiationEngine.evaluateAsBorrower(msg.negotiationId, {
+      balance,
+      targetApy: 0.058,
+      existingDebt: this.loanDebt,
+    });
+
+    const result = await this.negotiationEngine.processCounter(
+      msg.negotiationId,
+      'strategist',
+      evaluation.counterTerms,
+      evaluation.accept,
+    );
+
+    if (result.resolved) {
+      this.activeNegotiationId = null;
+      if (result.accepted && result.finalTerms) {
+        this.updateAction(`negotiation agreed: ${result.finalTerms.amount} USDt at ${(result.finalTerms.interestRate * 100).toFixed(1)}%`);
+      } else {
+        this.updateAction(`negotiation failed — no deal reached`);
+      }
+    } else {
+      this.updateAction(`negotiation round ${msg.round + 1}: countered at ${(evaluation.counterTerms.interestRate * 100).toFixed(1)}%`);
     }
   }
 
@@ -221,24 +269,38 @@ What should I do? Consider deploying idle capital, rebalancing positions, borrow
   }
 
   private async requestLoan(decision: { parameters: Record<string, unknown> }): Promise<void> {
-    if (this.activeLoanId) {
-      logger.info(`[STRATEGIST] Already have active loan ${this.activeLoanId}, skipping request`);
+    if (this.activeLoanId || this.activeNegotiationId) {
+      logger.info(`[STRATEGIST] Already have active loan/negotiation, skipping`);
       return;
     }
 
     const amount = (decision.parameters.amount as number) || 100;
     const targetApy = (decision.parameters.targetApy as number) || 0.06;
+    const purpose = `Deploy to DeFi at expected ${(targetApy * 100).toFixed(1)}% APY`;
 
-    this.pendingLoan = { amount, purpose: `Deploy to DeFi at expected ${(targetApy * 100).toFixed(1)}% APY` };
+    // Use negotiation engine if available — multi-round deal-making
+    if (this.negotiationEngine) {
+      const proposedRate = Math.max(0.05, targetApy * 0.6); // Start low
+      const negId = await this.negotiationEngine.initiateNegotiation(
+        'strategist', 'banker',
+        { amount, interestRate: proposedRate, duration: 24 },
+        purpose,
+      );
+      this.activeNegotiationId = negId;
+      this.updateAction(`negotiating loan: proposed ${amount} USDt at ${(proposedRate * 100).toFixed(1)}%`);
+      return;
+    }
 
+    // Fallback: simple loan request
+    this.pendingLoan = { amount, purpose };
     this.sendMessage({
       type: 'loan_request',
       from: 'strategist',
       to: 'banker',
       amount,
-      purpose: this.pendingLoan.purpose,
+      purpose,
       expectedReturn: targetApy * 100,
-      duration: 24, // 24 hours
+      duration: 24,
       timestamp: Date.now(),
     });
 
