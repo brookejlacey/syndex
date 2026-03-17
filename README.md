@@ -4,6 +4,12 @@
 
 NEXUS is an autonomous network of AI agents that form a self-sustaining micro-economy. Each agent has its own Tether WDK wallet, its own P&L, and its own AI-powered decision-making logic. The agents earn revenue from DeFi, lend to each other, and tip content creators — all without human intervention.
 
+### Legend-Tier Features
+
+- **Agent-to-Agent Negotiation** — When Strategist needs a loan, agents engage in multi-round LLM-powered negotiations. Each side reasons about the other's proposal and formulates counter-offers across up to 4 rounds until a deal is struck.
+- **Natural Language Treasury Control** — Humans command the economy in plain English via a CLI terminal: "move 200 USDt from banker to strategist", "pause the patron", "what's the yield?"
+- **Self-Sustaining Economics** — Real-time tracking of AI compute costs vs DeFi yield. The network's goal is to earn more from DeFi than it spends on Claude API reasoning — paying for its own intelligence.
+
 ## Architecture
 
 ```
