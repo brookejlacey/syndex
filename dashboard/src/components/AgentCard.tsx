@@ -4,7 +4,7 @@ import { clsx } from 'clsx';
 import type { AgentStatus } from '@/hooks/useWebSocket';
 
 const roleConfig: Record<string, { label: string; icon: string; color: string; glowClass: string }> = {
-  nexus: { label: 'NEXUS', icon: '⬡', color: 'text-cyan-400', glowClass: 'glow-blue' },
+  syndex: { label: 'SYNDEX', icon: '⬡', color: 'text-cyan-400', glowClass: 'glow-blue' },
   banker: { label: 'BANKER', icon: '🏦', color: 'text-green-400', glowClass: 'glow-green' },
   strategist: { label: 'STRATEGIST', icon: '📊', color: 'text-purple-400', glowClass: 'glow-purple' },
   patron: { label: 'PATRON', icon: '💝', color: 'text-yellow-400', glowClass: 'glow-yellow' },
@@ -17,7 +17,7 @@ const statusColors: Record<string, string> = {
 };
 
 export function AgentCard({ agent }: { agent: AgentStatus }) {
-  const config = roleConfig[agent.role] || roleConfig.nexus;
+  const config = roleConfig[agent.role] || roleConfig.syndex;
   const timeSince = Math.round((Date.now() - agent.lastActionTime) / 1000);
 
   return (

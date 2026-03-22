@@ -23,7 +23,7 @@ export default function Dashboard() {
       <header className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            <span className="text-cyan-400">NEXUS</span>
+            <span className="text-cyan-400">SYNDEX</span>
             <span className="text-[var(--text-secondary)] font-normal text-lg ml-3">Multi-Agent Economic Network</span>
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -53,7 +53,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="text-4xl mb-4 animate-pulse">⬡</div>
-            <p className="text-[var(--text-secondary)]">Connecting to Nexus network...</p>
+            <p className="text-[var(--text-secondary)]">Connecting to Syndex network...</p>
             <p className="text-xs text-[var(--text-secondary)] mt-2">Make sure the agent runtime is running on port 3001</p>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function Dashboard() {
 
           {/* Agent cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {(['nexus', 'banker', 'strategist', 'patron'] as const).map(role => (
+            {(['syndex', 'banker', 'strategist', 'patron'] as const).map(role => (
               <AgentCard key={role} agent={state.agents[role]} />
             ))}
           </div>
@@ -111,7 +111,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <footer className="mt-12 pt-6 border-t border-[var(--border)] text-center text-xs text-[var(--text-secondary)]">
-        NEXUS — Built for Hackathon Galactica: WDK Edition 1 | Powered by Tether WDK + Claude AI + OpenClaw
+        SYNDEX — Built for Hackathon Galactica: WDK Edition 1 | Powered by Tether WDK + Claude AI + OpenClaw
       </footer>
     </div>
   );

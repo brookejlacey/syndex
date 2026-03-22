@@ -4,7 +4,7 @@ import { clsx } from 'clsx';
 import type { AgentDecision } from '@/hooks/useWebSocket';
 
 const agentColors: Record<string, string> = {
-  nexus: 'text-cyan-400',
+  syndex: 'text-cyan-400',
   banker: 'text-green-400',
   strategist: 'text-purple-400',
   patron: 'text-yellow-400',

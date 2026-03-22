@@ -1,7 +1,7 @@
 import type { Brain } from './brain.js';
 import type { MessageBus } from './message-bus.js';
 import type { WalletManager } from './wallet-manager.js';
-import type { NexusOrchestrator } from '../agents/nexus/index.js';
+import type { SyndexOrchestrator } from '../agents/syndex/index.js';
 import type { BankerAgent } from '../agents/banker/index.js';
 import type { StrategistAgent } from '../agents/strategist/index.js';
 import type { PatronAgent } from '../agents/patron/index.js';
@@ -12,7 +12,7 @@ import { randomUUID } from 'crypto';
 /**
  * NATURAL LANGUAGE COMMAND ENGINE
  *
- * Humans can control the entire Nexus economy in plain English:
+ * Humans can control the entire Syndex economy in plain English:
  *
  * "Move 200 USDt from Banker to Strategist"
  * "Pause the Patron until yield exceeds 5%"
@@ -33,7 +33,7 @@ export class CommandEngine {
   private brain: Brain;
   private bus: MessageBus;
   private wallet: WalletManager;
-  private nexus!: NexusOrchestrator;
+  private syndex!: SyndexOrchestrator;
   private banker!: BankerAgent;
   private strategist!: StrategistAgent;
   private patron!: PatronAgent;
@@ -46,12 +46,12 @@ export class CommandEngine {
   }
 
   registerAgents(
-    nexus: NexusOrchestrator,
+    syndex: SyndexOrchestrator,
     banker: BankerAgent,
     strategist: StrategistAgent,
     patron: PatronAgent,
   ): void {
-    this.nexus = nexus;
+    this.syndex = syndex;
     this.banker = banker;
     this.strategist = strategist;
     this.patron = patron;
@@ -62,12 +62,12 @@ export class CommandEngine {
     logger.info(`[CMD] Processing: "${command}"`);
 
     // Get current network state for context
-    const state = this.nexus.getNetworkState();
+    const state = this.syndex.getNetworkState();
 
     // Use Claude to parse intent and generate action
     const decision = await this.brain.think({
-      agent: 'nexus',
-      systemPrompt: `You are the command interpreter for the Nexus multi-agent economic network. A human operator is giving you a natural language command. Parse their intent and respond with a JSON action.
+      agent: 'syndex',
+      systemPrompt: `You are the command interpreter for the Syndex multi-agent economic network. A human operator is giving you a natural language command. Parse their intent and respond with a JSON action.
 
 AVAILABLE ACTIONS:
 \`\`\`json
@@ -76,8 +76,8 @@ AVAILABLE ACTIONS:
   "reasoning": "what you understood and will do",
   "confidence": 0.0-1.0,
   "parameters": {
-    "fromAgent": "nexus" | "banker" | "strategist" | "patron",
-    "toAgent": "nexus" | "banker" | "strategist" | "patron",
+    "fromAgent": "syndex" | "banker" | "strategist" | "patron",
+    "toAgent": "syndex" | "banker" | "strategist" | "patron",
     "amount": number,
     "targetAgent": "banker" | "strategist" | "patron",
     "queryType": "status" | "metrics" | "decisions" | "loans" | "tips" | "positions",
@@ -143,7 +143,7 @@ Parse the human's command and determine the appropriate action. For queries, set
     this.bus.send({
       type: 'human_command',
       from: 'human',
-      to: 'nexus',
+      to: 'syndex',
       command,
       response: result.response,
       timestamp: Date.now(),
@@ -198,7 +198,7 @@ Parse the human's command and determine the appropriate action. For queries, set
 
     this.bus.send({
       type: 'circuit_break',
-      from: 'nexus',
+      from: 'syndex',
       to: target,
       reason: 'Human-directed pause',
       action: 'pause',
@@ -214,7 +214,7 @@ Parse the human's command and determine the appropriate action. For queries, set
 
     this.bus.send({
       type: 'circuit_break',
-      from: 'nexus',
+      from: 'syndex',
       to: target,
       reason: 'Human-directed resume',
       action: 'resume',
@@ -229,7 +229,7 @@ Parse the human's command and determine the appropriate action. For queries, set
 
     this.bus.send({
       type: 'circuit_break',
-      from: 'nexus',
+      from: 'syndex',
       to: target,
       reason: 'Human-directed emergency liquidation',
       action: 'liquidate',
@@ -240,7 +240,7 @@ Parse the human's command and determine the appropriate action. For queries, set
   }
 
   private handleQuery(queryType: string, params: Record<string, unknown>): CommandResult {
-    const state = this.nexus.getNetworkState();
+    const state = this.syndex.getNetworkState();
 
     switch (queryType) {
       case 'query_status': {
@@ -300,8 +300,8 @@ Parse the human's command and determine the appropriate action. For queries, set
   private async handleGenericQuery(command: string, state: any): Promise<CommandResult> {
     // For commands we can't classify, use Claude to generate a natural language response
     const decision = await this.brain.think({
-      agent: 'nexus',
-      systemPrompt: `You are the Nexus network assistant. Answer the human's question about the network using the data provided. Be concise (1-3 sentences max).`,
+      agent: 'syndex',
+      systemPrompt: `You are the Syndex network assistant. Answer the human's question about the network using the data provided. Be concise (1-3 sentences max).`,
       context: `Question: "${command}"
 
 Network data:

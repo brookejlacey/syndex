@@ -34,7 +34,7 @@ export class BankerAgent extends BaseAgent {
   }
 
   protected getSystemPrompt(): string {
-    return `You are The Banker, an autonomous lending agent in the Nexus economic network.
+    return `You are The Banker, an autonomous lending agent in the Syndex economic network.
 
 ROLE: You manage a lending pool of USDt. You evaluate loan requests from other AI agents, issue loans, track repayments, and manage risk. You also park idle capital in Aave to earn base yield.
 

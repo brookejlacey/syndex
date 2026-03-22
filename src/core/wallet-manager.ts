@@ -494,7 +494,7 @@ export class WalletManager {
 
   private generateSimAddress(role: AgentRole): string {
     const bytes: Record<AgentRole, string> = {
-      nexus: 'A1E0', banker: 'B4CE', strategist: 'C7A1', patron: 'D3F9',
+      syndex: 'A1E0', banker: 'B4CE', strategist: 'C7A1', patron: 'D3F9',
     };
     const s = bytes[role] || '0000';
     return `0x${s}${Math.random().toString(16).slice(2, 38)}${s}`;

@@ -4,7 +4,7 @@ import type { NetworkState } from '@/hooks/useWebSocket';
 
 /**
  * Visual representation of money flowing between agents.
- * Shows the Nexus network topology with live transaction flows.
+ * Shows the Syndex network topology with live transaction flows.
  */
 export function FlowDiagram({ state }: { state: NetworkState }) {
   const agents = state.agents;
@@ -28,11 +28,11 @@ export function FlowDiagram({ state }: { state: NetworkState }) {
         {/* Strategist → Banker (repayment) */}
         <line x1="300" y1="195" x2="150" y2="195" stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.4" />
 
-        {/* Nexus node */}
+        {/* Syndex node */}
         <circle cx="300" cy="50" r="30" fill="#1a1a2e" stroke="#22d3ee" strokeWidth="2" />
-        <text x="300" y="45" textAnchor="middle" fill="#22d3ee" fontSize="10" fontWeight="bold">NEXUS</text>
+        <text x="300" y="45" textAnchor="middle" fill="#22d3ee" fontSize="10" fontWeight="bold">SYNDEX</text>
         <text x="300" y="60" textAnchor="middle" fill="#8888a8" fontSize="8">
-          {agents.nexus?.balance.toFixed(0)} USDt
+          {agents.syndex?.balance.toFixed(0)} USDt
         </text>
 
         {/* Banker node */}

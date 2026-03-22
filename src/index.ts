@@ -5,27 +5,27 @@ import { Brain } from './core/brain.js';
 import { BankerAgent } from './agents/banker/index.js';
 import { StrategistAgent } from './agents/strategist/index.js';
 import { PatronAgent } from './agents/patron/index.js';
-import { NexusOrchestrator } from './agents/nexus/index.js';
+import { SyndexOrchestrator } from './agents/syndex/index.js';
 import { NegotiationEngine } from './core/negotiation-engine.js';
 import { CommandEngine } from './core/command-engine.js';
 import { ApiServer } from './services/api-server.js';
 import { logger } from './utils/logger.js';
 
 /**
- * NEXUS — Self-Sustaining Multi-Agent Economic Network
+ * SYNDEX — Self-Sustaining Multi-Agent Economic Network
  *
  * Boot sequence:
  * 1. Initialize shared infrastructure (bus, wallets, brain)
  * 2. Create agent wallets via WDK
  * 3. Start all agents
  * 4. Start API server for dashboard
- * 5. Nexus distributes initial capital
+ * 5. Syndex distributes initial capital
  * 6. Agents begin autonomous operation
  */
 
 async function main() {
   logger.info('═══════════════════════════════════════════');
-  logger.info('  NEXUS — Multi-Agent Economic Network');
+  logger.info('  SYNDEX — Multi-Agent Economic Network');
   logger.info('  Powered by Tether WDK + Claude AI');
   logger.info('═══════════════════════════════════════════');
 
@@ -54,7 +54,7 @@ async function main() {
   };
 
   const seeds = {
-    nexus: process.env.NEXUS_SEED || await generateSeed(),
+    syndex: process.env.SYNDEX_SEED || await generateSeed(),
     banker: process.env.BANKER_SEED || await generateSeed(),
     strategist: process.env.STRATEGIST_SEED || await generateSeed(),
     patron: process.env.PATRON_SEED || await generateSeed(),
@@ -63,7 +63,7 @@ async function main() {
   logger.info('[BOOT] Initializing agent wallets...');
 
   await Promise.all([
-    wallet.initializeWallet('nexus', { seedPhrase: seeds.nexus, chain: 'ethereum', rpcUrl, erc4337: erc4337Config }),
+    wallet.initializeWallet('syndex', { seedPhrase: seeds.syndex, chain: 'ethereum', rpcUrl, erc4337: erc4337Config }),
     wallet.initializeWallet('banker', { seedPhrase: seeds.banker, chain: 'ethereum', rpcUrl, erc4337: erc4337Config }),
     wallet.initializeWallet('strategist', { seedPhrase: seeds.strategist, chain: 'ethereum', rpcUrl, erc4337: erc4337Config }),
     wallet.initializeWallet('patron', { seedPhrase: seeds.patron, chain: 'ethereum', rpcUrl, erc4337: erc4337Config }),
@@ -71,7 +71,7 @@ async function main() {
 
   // Set simulated initial balances for demo
   const initialCapital = parseFloat(process.env.INITIAL_CAPITAL || '1000');
-  wallet.setBalance('nexus', initialCapital);
+  wallet.setBalance('syndex', initialCapital);
 
   logger.info(`[BOOT] Wallets initialized. Initial capital: ${initialCapital} USDt`);
 
@@ -79,34 +79,34 @@ async function main() {
   const banker = new BankerAgent(bus, wallet, brain);
   const strategist = new StrategistAgent(bus, wallet, brain);
   const patron = new PatronAgent(bus, wallet, brain);
-  const nexus = new NexusOrchestrator(bus, wallet, brain);
+  const syndex = new SyndexOrchestrator(bus, wallet, brain);
 
   // Register agents with orchestrator
-  nexus.registerAgents(banker, strategist, patron);
+  syndex.registerAgents(banker, strategist, patron);
 
   // ─── Legendary Engines ────────────────────────────────────
   const negotiation = new NegotiationEngine(bus, brain);
   const command = new CommandEngine(brain, bus, wallet);
-  command.registerAgents(nexus, banker, strategist, patron);
+  command.registerAgents(syndex, banker, strategist, patron);
 
   // Inject engines into agents
   banker.setNegotiationEngine(negotiation);
   strategist.setNegotiationEngine(negotiation);
-  nexus.setEngines(negotiation, command);
+  syndex.setEngines(negotiation, command);
 
   logger.info('[BOOT] Negotiation engine + Natural language command engine initialized');
 
   // ─── Start API Server ───────────────────────────────────────
   const apiPort = parseInt(process.env.WS_PORT || '3001');
-  const api = new ApiServer(bus, nexus, banker, strategist, patron);
+  const api = new ApiServer(bus, syndex, banker, strategist, patron);
   api.setEngines(command, negotiation);
   api.start(apiPort);
 
   // ─── Start All Agents ───────────────────────────────────────
   logger.info('[BOOT] Starting agents...');
 
-  // Start nexus first (it distributes capital)
-  await nexus.start();
+  // Start syndex first (it distributes capital)
+  await syndex.start();
 
   // Wait for capital distribution, then start others
   await new Promise(resolve => setTimeout(resolve, 2000));
@@ -130,11 +130,11 @@ async function main() {
       patron.stop(),
       strategist.stop(),
       banker.stop(),
-      nexus.stop(),
+      syndex.stop(),
     ]);
     api.stop();
     await wallet.dispose();
-    logger.info('[SHUTDOWN] Nexus network stopped.');
+    logger.info('[SHUTDOWN] Syndex network stopped.');
     process.exit(0);
   };
 

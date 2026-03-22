@@ -49,7 +49,7 @@ export function CommandTerminal() {
     } catch {
       setHistory(prev => [...prev, {
         command,
-        response: 'Failed to connect to Nexus API',
+        response: 'Failed to connect to Syndex API',
         timestamp: Date.now(),
         success: false,
       }]);
@@ -62,7 +62,7 @@ export function CommandTerminal() {
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] p-4">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs font-bold text-cyan-400">NEXUS COMMAND</span>
+        <span className="text-xs font-bold text-cyan-400">SYNDEX COMMAND</span>
         <span className="text-xs text-[var(--text-secondary)]">Natural language treasury control</span>
       </div>
 

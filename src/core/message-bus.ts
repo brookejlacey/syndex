@@ -27,7 +27,7 @@ export class MessageBus extends EventEmitter {
 
     // Emit to specific agent
     this.emit(`message:${message.to}`, message);
-    // Emit to all listeners (nexus orchestrator monitors everything)
+    // Emit to all listeners (syndex orchestrator monitors everything)
     this.emit('message:*', message);
     // Emit to dashboard
     this.emitDashboard({ type: 'message', data: message });

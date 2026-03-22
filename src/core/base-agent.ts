@@ -5,7 +5,7 @@ import type { Brain } from './brain.js';
 import { logger } from '../utils/logger.js';
 
 /**
- * Base class for all Nexus agents.
+ * Base class for all Syndex agents.
  * Provides message handling, wallet access, AI reasoning, and lifecycle management.
  */
 export abstract class BaseAgent {

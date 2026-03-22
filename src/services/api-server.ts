@@ -2,7 +2,7 @@ import express from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
 import type { MessageBus } from '../core/message-bus.js';
-import type { NexusOrchestrator } from '../agents/nexus/index.js';
+import type { SyndexOrchestrator } from '../agents/syndex/index.js';
 import type { BankerAgent } from '../agents/banker/index.js';
 import type { StrategistAgent } from '../agents/strategist/index.js';
 import type { PatronAgent } from '../agents/patron/index.js';
@@ -20,7 +20,7 @@ export class ApiServer {
   private server: http.Server;
   private wss: WebSocketServer;
   private bus: MessageBus;
-  private nexus: NexusOrchestrator;
+  private syndex: SyndexOrchestrator;
   private banker: BankerAgent;
   private strategist: StrategistAgent;
   private patron: PatronAgent;
@@ -29,13 +29,13 @@ export class ApiServer {
 
   constructor(
     bus: MessageBus,
-    nexus: NexusOrchestrator,
+    syndex: SyndexOrchestrator,
     banker: BankerAgent,
     strategist: StrategistAgent,
     patron: PatronAgent,
   ) {
     this.bus = bus;
-    this.nexus = nexus;
+    this.syndex = syndex;
     this.banker = banker;
     this.strategist = strategist;
     this.patron = patron;
@@ -63,13 +63,13 @@ export class ApiServer {
   private setupRoutes(): void {
     // Network state snapshot
     this.app.get('/api/state', (_req, res) => {
-      res.json(this.nexus.getNetworkState());
+      res.json(this.syndex.getNetworkState());
     });
 
     // Individual agent status
     this.app.get('/api/agents/:role', async (req, res) => {
       const role = req.params.role;
-      const state = this.nexus.getNetworkState();
+      const state = this.syndex.getNetworkState();
       const agent = state.agents[role as keyof typeof state.agents];
       if (!agent) {
         res.status(404).json({ error: 'Agent not found' });
@@ -140,13 +140,13 @@ export class ApiServer {
 
     // Economics
     this.app.get('/api/economics', (_req, res) => {
-      const state = this.nexus.getNetworkState();
+      const state = this.syndex.getNetworkState();
       res.json(state.economics);
     });
 
     // Health check
     this.app.get('/api/health', (_req, res) => {
-      const state = this.nexus.getNetworkState();
+      const state = this.syndex.getNetworkState();
       res.json({
         status: state.networkHealth,
         agents: Object.fromEntries(
@@ -176,7 +176,7 @@ export class ApiServer {
       // Send current state immediately
       ws.send(JSON.stringify({
         type: 'state_update',
-        data: this.nexus.getNetworkState(),
+        data: this.syndex.getNetworkState(),
       }));
 
       ws.on('close', () => {

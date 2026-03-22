@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ─── Agent Identity ───────────────────────────────────────────────
-export type AgentRole = 'nexus' | 'banker' | 'strategist' | 'patron';
+export type AgentRole = 'syndex' | 'banker' | 'strategist' | 'patron';
 
 export interface AgentIdentity {
   role: AgentRole;

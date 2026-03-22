@@ -1,8 +1,8 @@
-# NEXUS — Self-Sustaining Multi-Agent Economic Network
+# SYNDEX — Self-Sustaining Multi-Agent Economic Network
 
 **Hackathon Galáctica: WDK Edition 1 Submission**
 
-NEXUS is an autonomous network of AI agents that form a self-sustaining micro-economy. Each agent has its own Tether WDK wallet, its own P&L, and its own AI-powered decision-making logic. The agents earn revenue from DeFi, lend to each other, and tip content creators — all without human intervention.
+SYNDEX is an autonomous network of AI agents that form a self-sustaining micro-economy. Each agent has its own Tether WDK wallet, its own P&L, and its own AI-powered decision-making logic. The agents earn revenue from DeFi, lend to each other, and tip content creators — all without human intervention.
 
 ### Legend-Tier Features
 
@@ -14,7 +14,7 @@ NEXUS is an autonomous network of AI agents that form a self-sustaining micro-ec
 
 ```
                     ┌──────────────┐
-                    │   NEXUS      │
+                    │   SYNDEX     │
                     │ Orchestrator │
                     └──────┬───────┘
                            │
@@ -37,14 +37,14 @@ NEXUS is an autonomous network of AI agents that form a self-sustaining micro-ec
 
 | Agent | Track | Role |
 |-------|-------|------|
-| **Nexus** | Agent Wallets | Orchestrator — creates wallets, distributes capital, monitors health |
+| **Syndex** | Agent Wallets | Orchestrator — creates wallets, distributes capital, monitors health |
 | **Banker** | Lending Bot | Autonomous lending — credit scoring, loan issuance, Aave idle yield |
 | **Strategist** | Autonomous DeFi | Yield optimization — Aave supply, Velora swaps, cross-chain bridges |
 | **Patron** | Tipping Bot | Creator tipping on Rumble — funded by DeFi yield surplus |
 
 ### Money Flow
 
-1. Nexus creates WDK wallets for all agents
+1. Syndex creates WDK wallets for all agents
 2. Initial capital distributed: 60% Banker, 30% Strategist, 10% Patron
 3. Banker parks idle capital in Aave, lends to Strategist on request
 4. Strategist deploys to DeFi, earns yield, repays Banker with interest
@@ -72,8 +72,8 @@ NEXUS is an autonomous network of AI agents that form a self-sustaining micro-ec
 
 ```bash
 # Clone
-git clone https://github.com/brookejlacey/nexus.git
-cd nexus
+git clone https://github.com/brookejlacey/syndex.git
+cd syndex
 
 # Install dependencies
 npm install
@@ -95,7 +95,7 @@ npm run dashboard:dev
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `ANTHROPIC_API_KEY` | Yes | Claude API key for agent reasoning |
-| `NEXUS_SEED` | No | WDK seed phrase for Nexus wallet (auto-generated if not set) |
+| `SYNDEX_SEED` | No | WDK seed phrase for Syndex wallet (auto-generated if not set) |
 | `BANKER_SEED` | No | WDK seed phrase for Banker wallet |
 | `STRATEGIST_SEED` | No | WDK seed phrase for Strategist wallet |
 | `PATRON_SEED` | No | WDK seed phrase for Patron wallet |
@@ -116,17 +116,17 @@ Real-time visualization at `http://localhost:3000`:
 
 ## OpenClaw Integration
 
-Install the Nexus skill on your OpenClaw instance (Mac Mini):
+Install the Syndex skill on your OpenClaw instance (Mac Mini):
 
 ```bash
-cp -r openclaw-skill ~/.openclaw/skills/nexus-network
+cp -r openclaw-skill ~/.openclaw/skills/syndex-network
 ```
 
 Then interact via WhatsApp/Telegram/Slack:
-- `/nexus status` — full network state
-- `/nexus banker` — lending pool metrics
-- `/nexus strategist` — DeFi positions
-- `/nexus patron` — tip history
+- `/syndex status` — full network state
+- `/syndex banker` — lending pool metrics
+- `/syndex strategist` — DeFi positions
+- `/syndex patron` — tip history
 
 ## WDK Integration
 
@@ -140,7 +140,7 @@ Every agent uses Tether's WDK for:
 
 ## Judging Criteria Alignment
 
-| Criteria | How Nexus Delivers |
+| Criteria | How Syndex Delivers |
 |----------|-------------------|
 | Agent Intelligence | 4 independent LLM-powered agents with distinct reasoning chains and decision logic |
 | WDK Integration | Every agent has its own WDK wallet; real USDt flows via lending, swaps, bridges |

@@ -11,7 +11,7 @@ import type { PatronAgent } from '../patron/index.js';
 import { logger } from '../../utils/logger.js';
 
 /**
- * THE NEXUS — Orchestrator Meta-Agent
+ * THE SYNDEX — Orchestrator Meta-Agent
  *
  * - Creates and manages all agent wallets
  * - Monitors health of the entire network
@@ -20,7 +20,7 @@ import { logger } from '../../utils/logger.js';
  * - Provides the unified network state for the dashboard
  * - Human interface via OpenClaw skill
  */
-export class NexusOrchestrator extends BaseAgent {
+export class SyndexOrchestrator extends BaseAgent {
   private agents: Map<AgentRole, BaseAgent> = new Map();
   private bankerAgent?: BankerAgent;
   private strategistAgent?: StrategistAgent;
@@ -33,14 +33,14 @@ export class NexusOrchestrator extends BaseAgent {
   private estimatedApiCost = 0; // rough: $0.003 per Sonnet call
 
   constructor(bus: MessageBus, wallet: WalletManager, brain: Brain) {
-    super('nexus', bus, wallet, brain);
+    super('syndex', bus, wallet, brain);
 
     // Subscribe to ALL messages for monitoring
     this.bus.subscribeAll((msg) => this.monitorMessage(msg));
 
     this.networkState = {
       agents: {
-        nexus: { role: 'nexus', status: 'active', walletAddress: '', balance: 0, pnl: 0, lastAction: 'initializing', lastActionTime: Date.now() },
+        syndex: { role: 'syndex', status: 'active', walletAddress: '', balance: 0, pnl: 0, lastAction: 'initializing', lastActionTime: Date.now() },
         banker: { role: 'banker', status: 'active', walletAddress: '', balance: 0, pnl: 0, lastAction: 'waiting', lastActionTime: Date.now() },
         strategist: { role: 'strategist', status: 'active', walletAddress: '', balance: 0, pnl: 0, lastAction: 'waiting', lastActionTime: Date.now() },
         patron: { role: 'patron', status: 'active', walletAddress: '', balance: 0, pnl: 0, lastAction: 'waiting', lastActionTime: Date.now() },
@@ -75,7 +75,7 @@ export class NexusOrchestrator extends BaseAgent {
   }
 
   protected getSystemPrompt(): string {
-    return `You are The Nexus, the orchestrator of a multi-agent economic network.
+    return `You are The Syndex, the orchestrator of a multi-agent economic network.
 
 ROLE: You monitor the health and performance of all agents (Banker, Strategist, Patron), manage capital allocation, and make strategic decisions about the network as a whole.
 
@@ -103,8 +103,8 @@ ORCHESTRATION RULES:
   }
 
   protected async onStart(): Promise<void> {
-    const balance = await this.wallet.getBalance('nexus');
-    logger.info(`[NEXUS] Orchestrator starting with ${balance} USDt`);
+    const balance = await this.wallet.getBalance('syndex');
+    logger.info(`[SYNDEX] Orchestrator starting with ${balance} USDt`);
 
     // Distribute initial capital to agents
     if (balance > 0) {
@@ -115,7 +115,7 @@ ORCHESTRATION RULES:
   }
 
   protected async onStop(): Promise<void> {
-    logger.info(`[NEXUS] Orchestrator shutting down`);
+    logger.info(`[SYNDEX] Orchestrator shutting down`);
   }
 
   protected getTickInterval(): number {
@@ -163,7 +163,7 @@ ORCHESTRATION RULES:
   private monitorMessage(message: AgentMessage): void {
     // Log significant events
     if (message.type === 'loan_request' || message.type === 'loan_response') {
-      logger.info(`[NEXUS] Observed: ${message.from} → ${message.to}: ${message.type}`);
+      logger.info(`[SYNDEX] Observed: ${message.from} → ${message.to}: ${message.type}`);
     }
   }
 
@@ -176,20 +176,20 @@ ORCHESTRATION RULES:
 
     for (const [role, amount] of Object.entries(allocations)) {
       try {
-        await this.wallet.sendToAgent('nexus', role as AgentRole, amount);
+        await this.wallet.sendToAgent('syndex', role as AgentRole, amount);
 
         this.sendMessage({
           type: 'fund_transfer',
-          from: 'nexus',
+          from: 'syndex',
           to: role,
           amount,
           purpose: `Initial capital allocation (${role === 'banker' ? '60%' : role === 'strategist' ? '30%' : '10%'})`,
           timestamp: Date.now(),
         });
 
-        logger.info(`[NEXUS] Allocated ${amount.toFixed(2)} USDt to ${role}`);
+        logger.info(`[SYNDEX] Allocated ${amount.toFixed(2)} USDt to ${role}`);
       } catch (err) {
-        logger.error(`[NEXUS] Failed to allocate to ${role}:`, err);
+        logger.error(`[SYNDEX] Failed to allocate to ${role}:`, err);
       }
     }
 
@@ -206,13 +206,13 @@ ORCHESTRATION RULES:
       }
     }
 
-    // Update Nexus own status
-    const nexusBalance = await this.wallet.getBalance('nexus');
-    this.networkState.agents.nexus = {
-      role: 'nexus',
+    // Update Syndex own status
+    const syndexBalance = await this.wallet.getBalance('syndex');
+    this.networkState.agents.syndex = {
+      role: 'syndex',
       status: 'active',
-      walletAddress: this.wallet.getWalletInfo('nexus')?.address || '',
-      balance: nexusBalance,
+      walletAddress: this.wallet.getWalletInfo('syndex')?.address || '',
+      balance: syndexBalance,
       pnl: this.pnl,
       lastAction: this.lastAction,
       lastActionTime: this.lastActionTime,
@@ -276,7 +276,7 @@ ORCHESTRATION RULES:
     for (const role of ['banker', 'strategist', 'patron'] as AgentRole[]) {
       this.sendMessage({
         type: 'health_check',
-        from: 'nexus',
+        from: 'syndex',
         to: role,
         timestamp: Date.now(),
       });
@@ -285,7 +285,7 @@ ORCHESTRATION RULES:
 
   private processHealthResponse(msg: Extract<AgentMessage, { type: 'health_response' }>): void {
     if (msg.status === 'critical') {
-      logger.error(`[NEXUS] CRITICAL: ${msg.from} reports critical status!`);
+      logger.error(`[SYNDEX] CRITICAL: ${msg.from} reports critical status!`);
       this.bus.emitDashboard({
         type: 'alert',
         data: {
@@ -297,7 +297,7 @@ ORCHESTRATION RULES:
   }
 
   private processTipNotification(msg: Extract<AgentMessage, { type: 'tip_executed' }>): void {
-    logger.info(`[NEXUS] Tip executed: ${msg.amount.toFixed(2)} USDt to ${msg.creator}`);
+    logger.info(`[SYNDEX] Tip executed: ${msg.amount.toFixed(2)} USDt to ${msg.creator}`);
   }
 
   private async strategicReview(): Promise<void> {
@@ -323,7 +323,7 @@ Is any intervention needed? Consider rebalancing, circuit breaking, or capital r
       const target = decision.parameters.targetAgent as AgentRole;
       this.sendMessage({
         type: 'circuit_break',
-        from: 'nexus',
+        from: 'syndex',
         to: target,
         reason: decision.reasoning,
         action: 'pause',
@@ -334,17 +334,17 @@ Is any intervention needed? Consider rebalancing, circuit breaking, or capital r
       const amount = decision.parameters.amount as number;
       if (target && amount > 0) {
         try {
-          await this.wallet.sendToAgent('nexus', target, amount);
+          await this.wallet.sendToAgent('syndex', target, amount);
           this.sendMessage({
             type: 'fund_transfer',
-            from: 'nexus',
+            from: 'syndex',
             to: target,
             amount,
             purpose: `Strategic reallocation: ${decision.reasoning}`,
             timestamp: Date.now(),
           });
         } catch (err) {
-          logger.error(`[NEXUS] Redistribution failed:`, err);
+          logger.error(`[SYNDEX] Redistribution failed:`, err);
         }
       }
     }

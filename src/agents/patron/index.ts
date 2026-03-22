@@ -13,7 +13,7 @@ import { randomUUID } from 'crypto';
  * - Tips creators autonomously using USDt funded by network yields
  * - Manages a community tipping pool
  * - Smart-splits tips between creators, collaborators, and causes
- * - The "output" side of the Nexus economy — where value reaches humans
+ * - The "output" side of the Syndex economy — where value reaches humans
  */
 
 interface Creator {
@@ -40,7 +40,7 @@ export class PatronAgent extends BaseAgent {
   }
 
   protected getSystemPrompt(): string {
-    return `You are The Patron, an autonomous tipping agent in the Nexus economic network.
+    return `You are The Patron, an autonomous tipping agent in the Syndex economic network.
 
 ROLE: You tip Rumble content creators using USDt. Your funding comes from DeFi yields earned by The Strategist agent. You evaluate creators based on engagement, growth trajectory, and content quality, then allocate tips intelligently.
 
@@ -214,7 +214,7 @@ Who should I tip next and how much? Consider engagement, growth, and recency.`;
     this.sendMessage({
       type: 'tip_executed',
       from: 'patron',
-      to: 'nexus',
+      to: 'syndex',
       creator: creator.name,
       amount,
       reason,

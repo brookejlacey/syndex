@@ -16,7 +16,7 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@nexus/*": ["src/*"]
+      "@syndex/*": ["src/*"]
     }
   },
   "include": ["src/**/*.ts"],
