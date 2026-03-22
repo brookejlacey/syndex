@@ -26,9 +26,7 @@ export class Brain {
     responseSchema?: Record<string, unknown>;
     model?: 'fast' | 'deep';
   }): Promise<AgentDecision> {
-    const model = params.model === 'deep'
-      ? 'claude-sonnet-4-20250514'
-      : 'claude-haiku-4-5-20251001';
+    const model = 'claude-haiku-4-5-20251001';
 
     const startTime = Date.now();
 

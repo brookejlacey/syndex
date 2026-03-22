@@ -247,7 +247,7 @@ ORCHESTRATION RULES:
 
     // Track API costs (rough estimate: $0.003 per Sonnet call)
     const decisionCount = this.brain.getDecisionLog().length;
-    this.estimatedApiCost = decisionCount * 0.003;
+    this.estimatedApiCost = decisionCount * 0.0003; // Haiku: ~$0.25/M input + $1.25/M output
 
     // Economics: is the network self-sustaining?
     const economics: NetworkEconomics = {
