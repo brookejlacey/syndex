@@ -75,7 +75,7 @@ export default function Dashboard() {
           )}
 
           {/* Economics overview */}
-          <EconomicsPanel economics={state.economics} />
+          {state.economics && <EconomicsPanel economics={state.economics} />}
 
           {/* Top metrics */}
           <MetricsBar state={state} />
@@ -96,14 +96,14 @@ export default function Dashboard() {
             <div className="lg:col-span-2 space-y-6">
               <FlowDiagram state={state} />
               <PositionsChart state={state} />
-              <NegotiationPanel negotiations={state.negotiations || []} />
-              <LoanTable loans={state.loans} />
+              <NegotiationPanel negotiations={state.negotiations ?? []} />
+              <LoanTable loans={state.loans ?? []} />
             </div>
 
             {/* Right column */}
             <div className="space-y-6">
               <ActivityFeed decisions={decisions} />
-              <TipFeed tips={state.tips} />
+              <TipFeed tips={state.tips ?? []} />
             </div>
           </div>
         </div>

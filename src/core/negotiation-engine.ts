@@ -149,6 +149,7 @@ export class NegotiationEngine {
         },
       });
 
+      this.cleanupOldNegotiations();
       return { resolved: true, accepted: true, finalTerms: counterTerms };
     }
 
@@ -156,6 +157,7 @@ export class NegotiationEngine {
       neg.status = 'rejected';
       neg.resolvedAt = Date.now();
       logger.info(`[NEGOTIATE] ${negotiationId} EXPIRED after ${MAX_ROUNDS} rounds — no agreement`);
+      this.cleanupOldNegotiations();
       return { resolved: true, accepted: false };
     }
 
@@ -339,6 +341,17 @@ Round ${neg.rounds.length + 1} of ${MAX_ROUNDS}. ${neg.rounds.length >= MAX_ROUN
         duration: (decision.parameters.duration as number) || proposed.duration,
       },
     };
+  }
+
+  /** Remove completed/rejected negotiations older than 1 hour when map exceeds 100 entries */
+  private cleanupOldNegotiations(): void {
+    if (this.negotiations.size <= 100) return;
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    for (const [id, neg] of this.negotiations) {
+      if ((neg.status === 'agreed' || neg.status === 'rejected') && neg.resolvedAt && neg.resolvedAt < oneHourAgo) {
+        this.negotiations.delete(id);
+      }
+    }
   }
 
   getNegotiations(): Negotiation[] {

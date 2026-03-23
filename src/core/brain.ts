@@ -53,6 +53,9 @@ export class Brain {
       logger.info(`[BRAIN] ${params.agent} decided: ${decision.action} (${elapsed}ms, confidence: ${decision.confidence})`);
 
       this.decisionLog.push(decision);
+      if (this.decisionLog.length > 500) {
+        this.decisionLog = this.decisionLog.slice(-500);
+      }
       return decision;
     } catch (err) {
       logger.error(`[BRAIN] Reasoning failed for ${params.agent}:`, err);

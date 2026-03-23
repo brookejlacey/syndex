@@ -19,6 +19,9 @@ export class MessageBus extends EventEmitter {
   /** Send a message from one agent to another */
   send(message: AgentMessage): void {
     this.messageLog.push(message);
+    if (this.messageLog.length > 1000) {
+      this.messageLog = this.messageLog.slice(-1000);
+    }
     logger.info(`[BUS] ${message.from} → ${message.to}: ${message.type}`, {
       type: message.type,
       from: message.from,

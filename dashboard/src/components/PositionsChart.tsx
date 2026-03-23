@@ -12,7 +12,7 @@ const protocolLabels: Record<string, string> = {
 };
 
 export function PositionsChart({ state }: { state: NetworkState }) {
-  const activePositions = state.positions.filter(p => p.amount > 0);
+  const activePositions = (state.positions ?? []).filter(p => p.amount > 0);
 
   // Aggregate by protocol
   const byProtocol = activePositions.reduce((acc, p) => {

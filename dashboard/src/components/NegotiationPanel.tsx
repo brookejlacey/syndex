@@ -32,14 +32,15 @@ const agentText: Record<string, string> = {
 };
 
 export function NegotiationPanel({ negotiations }: { negotiations: Negotiation[] }) {
-  const active = negotiations.filter(n => n.status === 'active');
-  const resolved = negotiations.filter(n => n.status !== 'active').slice(-3);
+  const safeNegotiations = negotiations ?? [];
+  const active = safeNegotiations.filter(n => n.status === 'active');
+  const resolved = safeNegotiations.filter(n => n.status !== 'active').slice(-3);
 
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5">
       <h2 className="text-lg font-bold mb-4 text-cyan-400">Agent Negotiations</h2>
 
-      {negotiations.length === 0 ? (
+      {safeNegotiations.length === 0 ? (
         <p className="text-sm text-[var(--text-secondary)] italic">
           No negotiations yet — Strategist will negotiate when requesting loans
         </p>

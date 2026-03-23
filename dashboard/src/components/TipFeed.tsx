@@ -3,7 +3,8 @@
 import type { TipRecord } from '@/hooks/useWebSocket';
 
 export function TipFeed({ tips }: { tips: TipRecord[] }) {
-  const sorted = [...tips].sort((a, b) => b.timestamp - a.timestamp);
+  const safeTips = tips ?? [];
+  const sorted = [...safeTips].sort((a, b) => b.timestamp - a.timestamp);
 
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5">

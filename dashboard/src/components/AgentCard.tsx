@@ -17,8 +17,9 @@ const statusColors: Record<string, string> = {
 };
 
 export function AgentCard({ agent }: { agent: AgentStatus }) {
+  if (!agent) return null;
   const config = roleConfig[agent.role] || roleConfig.syndex;
-  const timeSince = Math.round((Date.now() - agent.lastActionTime) / 1000);
+  const timeSince = Math.round((Date.now() - (agent.lastActionTime ?? 0)) / 1000);
 
   return (
     <div className={clsx(
@@ -42,27 +43,27 @@ export function AgentCard({ agent }: { agent: AgentStatus }) {
       {/* Balance */}
       <div className="mb-3">
         <p className="text-xs text-[var(--text-secondary)] mb-1">Balance</p>
-        <p className="text-2xl font-mono font-bold">{agent.balance.toFixed(2)} <span className="text-sm text-[var(--text-secondary)]">USDt</span></p>
+        <p className="text-2xl font-mono font-bold">{(agent.balance ?? 0).toFixed(2)} <span className="text-sm text-[var(--text-secondary)]">USDt</span></p>
       </div>
 
       {/* PnL */}
       <div className="mb-3">
         <p className="text-xs text-[var(--text-secondary)] mb-1">P&L</p>
-        <p className={clsx('text-lg font-mono font-semibold', agent.pnl >= 0 ? 'text-green-400' : 'text-red-400')}>
-          {agent.pnl >= 0 ? '+' : ''}{agent.pnl.toFixed(4)} USDt
+        <p className={clsx('text-lg font-mono font-semibold', (agent.pnl ?? 0) >= 0 ? 'text-green-400' : 'text-red-400')}>
+          {(agent.pnl ?? 0) >= 0 ? '+' : ''}{(agent.pnl ?? 0).toFixed(4)} USDt
         </p>
       </div>
 
       {/* Last Action */}
       <div className="pt-3 border-t border-[var(--border)]">
         <p className="text-xs text-[var(--text-secondary)] mb-1">Last Action ({timeSince}s ago)</p>
-        <p className="text-sm truncate">{agent.lastAction}</p>
+        <p className="text-sm truncate">{agent.lastAction ?? 'None'}</p>
       </div>
 
       {/* Wallet */}
       <div className="mt-2">
         <p className="text-xs text-[var(--text-secondary)] font-mono truncate">
-          {agent.walletAddress.slice(0, 10)}...{agent.walletAddress.slice(-8)}
+          {(agent.walletAddress ?? '').slice(0, 10)}...{(agent.walletAddress ?? '').slice(-8)}
         </p>
       </div>
     </div>

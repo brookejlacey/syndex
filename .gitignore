@@ -10,3 +10,5 @@ coverage/
 dashboard/node_modules/
 dashboard/.next/
 wdk-data.json
+
+.vercel

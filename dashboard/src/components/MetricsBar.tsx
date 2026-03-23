@@ -7,32 +7,32 @@ export function MetricsBar({ state }: { state: NetworkState }) {
   const metrics = [
     {
       label: 'Total Value Locked',
-      value: `${state.totalValueLocked.toFixed(2)} USDt`,
+      value: `${(state.totalValueLocked ?? 0).toFixed(2)} USDt`,
       color: 'text-cyan-400',
     },
     {
       label: 'Yield Earned',
-      value: `+${state.totalYieldEarned.toFixed(4)} USDt`,
+      value: `+${(state.totalYieldEarned ?? 0).toFixed(4)} USDt`,
       color: 'text-green-400',
     },
     {
       label: 'Tips Distributed',
-      value: `${state.totalTipsPaid.toFixed(2)} USDt`,
+      value: `${(state.totalTipsPaid ?? 0).toFixed(2)} USDt`,
       color: 'text-yellow-400',
     },
     {
       label: 'Active Loans',
-      value: state.loans.filter(l => l.status === 'active').length.toString(),
+      value: (state.loans ?? []).filter(l => l.status === 'active').length.toString(),
       color: 'text-green-400',
     },
     {
       label: 'DeFi Positions',
-      value: state.positions.filter(p => p.amount > 0).length.toString(),
+      value: (state.positions ?? []).filter(p => p.amount > 0).length.toString(),
       color: 'text-purple-400',
     },
     {
       label: 'Network Health',
-      value: state.networkHealth.toUpperCase(),
+      value: (state.networkHealth ?? 'unknown').toUpperCase(),
       color: state.networkHealth === 'healthy' ? 'text-green-400' :
              state.networkHealth === 'degraded' ? 'text-yellow-400' : 'text-red-400',
     },

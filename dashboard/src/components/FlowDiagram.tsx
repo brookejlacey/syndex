@@ -7,7 +7,7 @@ import type { NetworkState } from '@/hooks/useWebSocket';
  * Shows the Syndex network topology with live transaction flows.
  */
 export function FlowDiagram({ state }: { state: NetworkState }) {
-  const agents = state.agents;
+  const agents = state.agents ?? {};
 
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6">
@@ -32,28 +32,28 @@ export function FlowDiagram({ state }: { state: NetworkState }) {
         <circle cx="300" cy="50" r="30" fill="#1a1a2e" stroke="#22d3ee" strokeWidth="2" />
         <text x="300" y="45" textAnchor="middle" fill="#22d3ee" fontSize="10" fontWeight="bold">SYNDEX</text>
         <text x="300" y="60" textAnchor="middle" fill="#8888a8" fontSize="8">
-          {agents.syndex?.balance.toFixed(0)} USDt
+          {(agents.syndex?.balance ?? 0).toFixed(0)} USDt
         </text>
 
         {/* Banker node */}
         <circle cx="150" cy="180" r="28" fill="#1a1a2e" stroke="#34d399" strokeWidth="2" />
         <text x="150" y="175" textAnchor="middle" fill="#34d399" fontSize="10" fontWeight="bold">BANKER</text>
         <text x="150" y="190" textAnchor="middle" fill="#8888a8" fontSize="8">
-          {agents.banker?.balance.toFixed(0)} USDt
+          {(agents.banker?.balance ?? 0).toFixed(0)} USDt
         </text>
 
         {/* Strategist node */}
         <circle cx="300" cy="180" r="28" fill="#1a1a2e" stroke="#a78bfa" strokeWidth="2" />
         <text x="300" y="175" textAnchor="middle" fill="#a78bfa" fontSize="10" fontWeight="bold">STRAT</text>
         <text x="300" y="190" textAnchor="middle" fill="#8888a8" fontSize="8">
-          {agents.strategist?.balance.toFixed(0)} USDt
+          {(agents.strategist?.balance ?? 0).toFixed(0)} USDt
         </text>
 
         {/* Patron node */}
         <circle cx="450" cy="180" r="28" fill="#1a1a2e" stroke="#fbbf24" strokeWidth="2" />
         <text x="450" y="175" textAnchor="middle" fill="#fbbf24" fontSize="10" fontWeight="bold">PATRON</text>
         <text x="450" y="190" textAnchor="middle" fill="#8888a8" fontSize="8">
-          {agents.patron?.balance.toFixed(0)} USDt
+          {(agents.patron?.balance ?? 0).toFixed(0)} USDt
         </text>
 
         {/* Flow labels */}

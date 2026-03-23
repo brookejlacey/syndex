@@ -11,11 +11,12 @@ const statusColors: Record<string, string> = {
 };
 
 export function LoanTable({ loans }: { loans: Loan[] }) {
+  const safeLoans = loans ?? [];
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5">
       <h2 className="text-lg font-bold mb-4 text-green-400">Loans</h2>
 
-      {loans.length === 0 ? (
+      {safeLoans.length === 0 ? (
         <p className="text-sm text-[var(--text-secondary)] italic">No loans issued yet</p>
       ) : (
         <div className="overflow-x-auto">
@@ -31,7 +32,7 @@ export function LoanTable({ loans }: { loans: Loan[] }) {
               </tr>
             </thead>
             <tbody>
-              {loans.map((loan) => (
+              {safeLoans.map((loan) => (
                 <tr key={loan.id} className="border-b border-[var(--border)]/50 hover:bg-[var(--bg-card-hover)]">
                   <td className="py-2 font-mono text-xs">{loan.id}</td>
                   <td className="py-2 capitalize">{loan.borrower}</td>

@@ -11,7 +11,8 @@ const agentColors: Record<string, string> = {
 };
 
 export function ActivityFeed({ decisions }: { decisions: AgentDecision[] }) {
-  const sorted = [...decisions].sort((a, b) => b.timestamp - a.timestamp);
+  const safeDecisions = decisions ?? [];
+  const sorted = [...safeDecisions].sort((a, b) => b.timestamp - a.timestamp);
 
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5">

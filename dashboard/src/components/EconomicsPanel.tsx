@@ -11,7 +11,8 @@ interface NetworkEconomics {
 }
 
 export function EconomicsPanel({ economics }: { economics: NetworkEconomics }) {
-  const netProfit = economics.yieldEarnedUsd - economics.apiCostUsd;
+  if (!economics) return null;
+  const netProfit = (economics.yieldEarnedUsd ?? 0) - (economics.apiCostUsd ?? 0);
 
   return (
     <div className={clsx(
@@ -36,21 +37,21 @@ export function EconomicsPanel({ economics }: { economics: NetworkEconomics }) {
         <div>
           <p className="text-xs text-[var(--text-secondary)] mb-1">AI Compute Cost</p>
           <p className="text-lg font-mono font-bold text-red-400">
-            -${economics.apiCostUsd.toFixed(4)}
+            -${(economics.apiCostUsd ?? 0).toFixed(4)}
           </p>
         </div>
 
         <div>
           <p className="text-xs text-[var(--text-secondary)] mb-1">DeFi Yield Earned</p>
           <p className="text-lg font-mono font-bold text-green-400">
-            +${economics.yieldEarnedUsd.toFixed(4)}
+            +${(economics.yieldEarnedUsd ?? 0).toFixed(4)}
           </p>
         </div>
 
         <div>
           <p className="text-xs text-[var(--text-secondary)] mb-1">Tips to Creators</p>
           <p className="text-lg font-mono font-bold text-yellow-400">
-            ${economics.tipsPaidUsd.toFixed(4)}
+            ${(economics.tipsPaidUsd ?? 0).toFixed(4)}
           </p>
         </div>
 
@@ -70,7 +71,7 @@ export function EconomicsPanel({ economics }: { economics: NetworkEconomics }) {
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs text-[var(--text-secondary)]">Sustainability Ratio (yield / compute cost)</span>
           <span className="text-xs font-mono font-bold">
-            {economics.sustainabilityRatio.toFixed(1)}x
+            {(economics.sustainabilityRatio ?? 0).toFixed(1)}x
           </span>
         </div>
         <div className="h-2 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
@@ -79,7 +80,7 @@ export function EconomicsPanel({ economics }: { economics: NetworkEconomics }) {
               'h-full rounded-full transition-all duration-500',
               economics.sustainabilityRatio >= 1 ? 'bg-green-500' : 'bg-yellow-500',
             )}
-            style={{ width: `${Math.min(100, economics.sustainabilityRatio * 50)}%` }}
+            style={{ width: `${Math.min(100, (economics.sustainabilityRatio ?? 0) * 50)}%` }}
           />
         </div>
         <p className="text-xs text-[var(--text-secondary)] mt-1 text-center">
