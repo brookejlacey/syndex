@@ -27,13 +27,13 @@ export default function Landing() {
           min-height: 100vh;
         }
         .landing .page {
-          max-width: 720px;
+          max-width: 820px;
           margin: 0 auto;
           padding: 12vh 24px 16vh;
         }
         .landing .mark {
           font-family: 'IBM Plex Mono', monospace;
-          font-size: 0.75rem;
+          font-size: 0.85rem;
           font-weight: 400;
           letter-spacing: 0.15em;
           text-transform: uppercase;
@@ -42,7 +42,7 @@ export default function Landing() {
         }
         .landing h1 {
           font-family: 'IBM Plex Sans', sans-serif;
-          font-size: clamp(2.2rem, 5vw, 3.4rem);
+          font-size: clamp(2.6rem, 6vw, 4rem);
           font-weight: 300;
           line-height: 1.2;
           letter-spacing: -0.02em;
@@ -50,7 +50,7 @@ export default function Landing() {
           color: var(--white);
         }
         .landing .lead {
-          font-size: 1.1rem;
+          font-size: 1.25rem;
           color: var(--dim);
           max-width: 540px;
           margin-bottom: 6rem;
@@ -62,7 +62,7 @@ export default function Landing() {
         }
         .landing .section-label {
           font-family: 'IBM Plex Mono', monospace;
-          font-size: 0.7rem;
+          font-size: 0.8rem;
           font-weight: 500;
           letter-spacing: 0.2em;
           text-transform: uppercase;
@@ -71,8 +71,9 @@ export default function Landing() {
         }
         .landing p {
           color: #aaa;
+          font-size: 1.05rem;
           margin-bottom: 1.5rem;
-          max-width: 580px;
+          max-width: 620px;
         }
         .landing .agents {
           display: grid;
@@ -88,14 +89,14 @@ export default function Landing() {
         }
         .landing .agent-name {
           font-family: 'IBM Plex Mono', monospace;
-          font-size: 0.8rem;
+          font-size: 0.95rem;
           font-weight: 500;
           letter-spacing: 0.05em;
           color: var(--white);
           margin-bottom: 0.6rem;
         }
         .landing .agent-desc {
-          font-size: 0.85rem;
+          font-size: 0.95rem;
           color: var(--dim);
           line-height: 1.5;
           max-width: none;
@@ -103,7 +104,7 @@ export default function Landing() {
         }
         .landing .flow {
           font-family: 'IBM Plex Mono', monospace;
-          font-size: 0.8rem;
+          font-size: 0.95rem;
           line-height: 2.2;
           color: var(--dim);
           margin: 2rem 0 4rem;
@@ -120,7 +121,7 @@ export default function Landing() {
         }
         .landing .tech span {
           font-family: 'IBM Plex Mono', monospace;
-          font-size: 0.72rem;
+          font-size: 0.85rem;
           letter-spacing: 0.04em;
           color: var(--dim);
           border: 1px solid var(--faint);
@@ -133,7 +134,7 @@ export default function Landing() {
         }
         .landing .links a {
           font-family: 'IBM Plex Mono', monospace;
-          font-size: 0.8rem;
+          font-size: 0.95rem;
           color: var(--white);
           text-decoration: none;
           letter-spacing: 0.02em;
@@ -144,14 +145,14 @@ export default function Landing() {
         .landing .links a:hover { border-color: var(--accent); }
         .landing .equation {
           font-family: 'IBM Plex Mono', monospace;
-          font-size: 1rem;
+          font-size: 1.2rem;
           color: var(--white);
           margin: 1.5rem 0 1rem;
           letter-spacing: 0.02em;
         }
         .landing .equation .op { color: var(--accent); }
         .landing .footnote {
-          font-size: 0.82rem;
+          font-size: 0.9rem;
           color: #555;
           margin-top: 3rem;
           font-style: italic;
