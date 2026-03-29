@@ -186,9 +186,9 @@ export class ApiServer {
   }
 
   start(port: number): void {
-    this.server.listen(port, () => {
-      logger.info(`[API] Server running on http://localhost:${port}`);
-      logger.info(`[API] WebSocket on ws://localhost:${port}`);
+    this.server.listen(port, '0.0.0.0', () => {
+      logger.info(`[API] Server running on http://0.0.0.0:${port}`);
+      logger.info(`[API] WebSocket on ws://0.0.0.0:${port}`);
     });
   }
 
