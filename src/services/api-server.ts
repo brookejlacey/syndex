@@ -190,10 +190,14 @@ export class ApiServer {
       logger.info(`[API] Server running on http://0.0.0.0:${port}`);
       logger.info(`[API] WebSocket on ws://0.0.0.0:${port}`);
 
-      // Self-ping every 10 minutes to prevent Render free tier spin-down
-      setInterval(() => {
-        fetch(`http://0.0.0.0:${port}/api/health`).catch(() => {});
-      }, 10 * 60 * 1000);
+      // Self-ping every 5 minutes to prevent Render free tier spin-down
+      const renderUrl = process.env.RENDER_EXTERNAL_URL;
+      if (renderUrl) {
+        setInterval(() => {
+          fetch(`${renderUrl}/api/health`).catch(() => {});
+        }, 5 * 60 * 1000);
+        logger.info(`[API] Keep-alive ping enabled: ${renderUrl}/api/health every 5m`);
+      }
     });
   }
 
